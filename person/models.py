@@ -4,7 +4,7 @@ from django.template.defaultfilters import slugify
 from django.conf import settings
 from django.core.cache import cache
 
-import datetime, json, os.path
+import datetime, json, os.path, re
 from dateutil.relativedelta import relativedelta
 from jsonfield import JSONField
 
@@ -412,13 +412,13 @@ class Person(models.Model):
         if hasattr(Person.load_caucus_membership_data, '_cache'):
             return Person.load_caucus_membership_data._cache
         import glob, rtyaml
-        CACUSES_DIRECTORY = "/home/govtrack/data/caucuses/118"
+        CACUSES_GLOB = "/home/govtrack/data/caucuses/*/*.yaml"
         caucus_membership = set()
-        for caucus in glob.glob(CACUSES_DIRECTORY + "/*.yaml"):
-          caucusdata = rtyaml.load(open(caucus))
-          caucus = caucus.replace(".yaml", "")
+        for caucus_fn in glob.glob(CACUSES_GLOB):
+          congress = int(re.search(r"/(\d+)/", caucus_fn).group(1))
+          caucusdata = rtyaml.load(open(caucus_fn))
           for p in caucusdata["members"]:
-            caucus_membership.add((caucusdata["name"], p["id"]))
+            caucus_membership.add((congress, caucusdata["name"], p["id"]))
         Person.load_caucus_membership_data._cache = caucus_membership
         return caucus_membership
 
