@@ -74,7 +74,14 @@ def vote_search_manager():
             <div><span class="fa-solid fa-calendar fa-fw" aria-hidden="true" style="margin-left: 4px; color: #888"></span> {{object.created|date}} {{object.created|time|cut:"midnight"}}</div>
         </div>
         <div class="col-12 col-sm-6 col-md-8">
-            <div><span class="fa-solid fa-info fa-fw" aria-hidden="true" style="color: #888"></span> {{object.summary}}</div>
+            <div
+              {% with passfail=object.pass_fail %}
+                {% if passfail is True %}class="vote_positive"
+                {% elif passfail is False %}class="vote_negative"{% endif %}
+              {% endwith %}
+            >
+              <span class="fa-solid fa-info fa-fw" aria-hidden="true" style="color: #888"></span> {{object.summary}}
+            </div>
             <div style="padding: 3px 0 0 3px"><a class="btn btn-sm btn-default" style="padding: 3px; font-weight: normal; color: #444;"
               href="/congress/votes/compare/_add?vote={{object.congressproject_id}}"
               title="Compare to Another Vote">
