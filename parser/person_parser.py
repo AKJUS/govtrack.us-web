@@ -58,6 +58,7 @@ class PersonProcessor(YamlProcessor):
         return self.GENDER_MAPPING[value]
 
     def bio__birthday_handler(self, value):
+        if not value: return None
         return datetime.strptime(value, '%Y-%m-%d')
 
     def id__govtrack_handler(self, value):
