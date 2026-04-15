@@ -57,7 +57,7 @@ def markdown(value, trusted=False):
         if urlp.scheme not in ("http", "https") and (not trusted or urlp.scheme not in ("data",)):
             return None
         return url
-    valid_tags = set('strong em a code p h1 h2 h3 h4 h5 h6 pre br hr img ul ol li span blockquote'.split())
+    valid_tags = set('strong em a code p h1 h2 h3 h4 h5 h6 pre br hr img ul ol li span blockquote table thead tbody tr th td'.split())
     valid_tags = set('{http://www.w3.org/1999/xhtml}' + tag for tag in valid_tags)
     dom = html5lib.HTMLParser().parseFragment(html)
     for node in dom.iter():
@@ -73,6 +73,7 @@ def markdown(value, trusted=False):
             else:
                 # No other attributes are permitted.
                 node.attrib.pop(name)
+        if node.tag == '{http://www.w3.org/1999/xhtml}table': node.set("class", "table")
 
     # If there is an h1 in the output, demote all of the headings
     # so we don't create something that interfere's with the page h1.
