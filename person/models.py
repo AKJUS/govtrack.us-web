@@ -461,11 +461,14 @@ class Person(models.Model):
                 ], key = lambda p : p.sortname)
 
             # Load the current role for all members and assign to the same
-            # Person instances that were put into caucus_metadata.
+            # Person instances that were put into caucus_metadata. Drop members
+            # without a current role.
             # (I think this will speed up name generation as well.)
             roles = PersonRole.objects.filter(person__in=all_members.values(), current=True)
             for r in roles:
                 all_members[r.person.id].role = r
+            for caucus in caucus_metadata:
+                caucus["members"] = [p for p in caucus["members"] if hasattr(p, "role")]
 
         return caucus_metadata
 
