@@ -30,5 +30,6 @@ urlpatterns = [
     re_path(r'^covid-19', website.views.covid19),
     re_path(r'^community-forum/_ajax/post', website.views.community_forum_post_message),
     re_path(r'^posts.rss', website.views.BlogPostsFeed()),
+    re_path(r'^posts/(?P<id>\d+)/(?P<slug>[a-z0-9\-_]+)/preview$', website.views.post_preview),
     re_path(r'^posts(?:/(?:(?P<category>analysis|news)|(?P<id>\d+)/(?P<slug>[a-z0-9\-_]+)))?$', website.views.posts),
 ]

@@ -44,8 +44,10 @@ def markdown(value, trusted=False):
     import cmarkgfm
     from cmarkgfm.cmark import Options as cmarkgfmOptions
 
-    html = cmarkgfm.github_flavored_markdown_to_html(value,
-        options=cmarkgfmOptions.CMARK_OPT_UNSAFE if trusted else 0)
+    opts = cmarkgfmOptions.CMARK_OPT_SMART
+    if trusted: opts |= cmarkgfmOptions.CMARK_OPT_UNSAFE | cmarkgfmOptions.CMARK_OPT_LIBERAL_HTML_TAG
+
+    html = cmarkgfm.github_flavored_markdown_to_html(value, opts)
 
     import html5lib, urllib.parse
     def filter_url(url):

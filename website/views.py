@@ -1305,6 +1305,15 @@ def posts(request, category=None, id=None, slug=None):
         "post": post,
         "categories": BlogPost.get_categories_with_freq() })
 
+@login_required
+def post_preview(request, id=None, slug=None):
+    post = get_object_or_404(BlogPost, id=id)
+    if request.path != post.get_absolute_url():
+        return redirect(post.get_absolute_url())
+    return render(request, 'website/post.html', {
+        "post": post,
+        "categories": BlogPost.get_categories_with_freq() })
+
 import django.contrib.syndication.views
 class BlogPostsFeed(django.contrib.syndication.views.Feed):
     title = "GovTrack.us Posts"

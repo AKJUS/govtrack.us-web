@@ -454,8 +454,10 @@ class BlogPost(models.Model):
 
     def get_absolute_url(self):
         from django.template.defaultfilters import slugify
-        if not self.published: return "/posts"
-        return "/posts/{}/{}_{}".format(self.id, self.created.date().isoformat(), slugify(self.title))
+        return "/posts/{}/{}_{}{}".format(self.id,
+                                          self.created.date().isoformat(),
+                                          slugify(self.title),
+                                          "" if self.published else "/preview")
 
     def body_preview_html(self):
         # Remove images before character truncation.
