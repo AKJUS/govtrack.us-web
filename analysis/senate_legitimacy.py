@@ -77,10 +77,11 @@ for vote in tqdm.tqdm(list(Vote.objects\
 	statepop_percent_yea = pop_by_option["+"] / state_pop_total
 
 	# just get interesting ones
-	if statepop_percent_yea > .47: continue
+	if statepop_percent_yea > .5: continue
 
 	# just get enacted bills
-	if not vote.is_on_passage or not vote.related_bill or not vote.related_bill.enacted_ex(): continue
+	if (not vote.is_on_passage or not vote.related_bill or not vote.related_bill.enacted_ex()) \
+	   and vote.category != VoteCategory.nomination: continue
 
 	# print
 	W.writerow([vote.congress, vote.session if len(vote.session) == 4 else vote.created.year, vote.created.isoformat(),

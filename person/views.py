@@ -247,10 +247,11 @@ def person_details(request, pk):
             cache.set(ck, kraken_cosponsors, 86400) # one day
 
         caucuses = []
-        for (congress, caucus) in Person.load_caucus_membership_data():
-            if congress != CURRENT_CONGRESS: continue
-            if person.bioguideid not in [m["id"] for m in caucus["members"]]: continue
-            caucuses.append(caucus)
+        if role.current:
+            for (congress, caucus) in Person.load_caucus_membership_data():
+                if congress != CURRENT_CONGRESS: continue
+                if person.bioguideid not in [m["id"] for m in caucus["members"]]: continue
+                caucuses.append(caucus)
 
         return {'person': person,
                 'role': role,

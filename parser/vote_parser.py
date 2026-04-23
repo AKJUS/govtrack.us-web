@@ -325,6 +325,8 @@ def main(options):
                             # 412690 who announced he would not take his seat are in the first
                             # quorum call of the House but are expected to not have a role.
                             pass
+                        elif voter.person.id == 400363:
+                            pass # died in office
                         else:
                             log.error(f"{fname}: Could not find role for {voter.person} on {vote.created}, possible roles: {voter.person.roles.all()}")
                             vote.missing_data = True
