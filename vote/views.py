@@ -512,7 +512,7 @@ def vote_thumbnail_image_seating_diagram(vote, image_width=330, image_height=190
 	elif re.match(r".* Not Sustained$", vote.result):
 		vote_result_2 = "Not Sustained"
 	else:
-		vote_result_2 = re.sub("^(Bill|Amendment|Resolution of Ratification|(Joint |Concurrent )?Resolution|Conference Report|Nomination|Motion to \S+|Motion|Motion for Attendance) ", "", vote.result)
+		vote_result_2 = re.sub("^(Bill|Amendment|Resolution of Ratification|(Joint |Concurrent )?Resolution|Conference Report|Nomination|Motion to \S+|Motion|Motion for Attendance|Point of Order) ", "", vote.result)
 	if vote_result_2 == "unknown": vote_result_2 = ""
 	if len(vote_result_2) > 15: vote_result_2 = vote_result_2[-15:]
 	

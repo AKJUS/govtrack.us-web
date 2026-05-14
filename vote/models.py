@@ -137,8 +137,8 @@ class Vote(models.Model):
         import re
         regexes = [
             (True, re.compile(r"Not Sustained")), # the sustained/not sustained cases are awkward to assign to a binary outcome but this seems to make the most sense
-            (False, re.compile(r"Failed|Rejected|Defeated|Not Germane|Not Guilty|Sustained")),
-            (True, re.compile(r"Passed|Agreed to|Overridden|Confirmed|Ratified|Guilty|Germane|Adopted|Accepted|Not Well Taken")),
+            (False, re.compile(r"Failed|Rejected|Defeated|Not Germane|Not Guilty|Sustained|Not Well Taken")),
+            (True, re.compile(r"Passed|Agreed to|Overridden|Confirmed|Ratified|Guilty|Germane|Adopted|Accepted|Well Taken")),
             (None, re.compile('.')), # some votes like votes for Speaker or quorum calls do not have a binary outcome
         ]
         for value, regex in regexes:
