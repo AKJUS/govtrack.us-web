@@ -601,23 +601,11 @@ def go_ad_free_complete_checkout_session(session_id):
         expand=['line_items'])
     if checkout_session.payment_status != 'unpaid' \
       and checkout_session.client_reference_id:
-
         # Save to user's profile
         from django.contrib.auth.models import User
         user = User.objects.get(id=int(checkout_session.client_reference_id.split("=")[1]))
         prof = user.userprofile()
-
-        from dateutil.relativedelta import relativedelta
-        now = datetime.now()
-        pfrec = { }
-        pfrec["stripe_checkout_session_id"] = checkout_session.id
-        pfrec["date"] = now.isoformat()
-        expires = now + relativedelta(years=1)
-        pfrec["expires"] = expires.isoformat()
-
-        if prof.paid_features == None: prof.paid_features = { }
-        prof.paid_features["ad_free"] = pfrec
-        prof.save()
+        prof.goAdFree(checkout_session.id)
     return checkout_session
 
 @anonymous_view

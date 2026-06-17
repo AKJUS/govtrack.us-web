@@ -75,6 +75,20 @@ class UserProfile(models.Model):
 
         return ret
 
+    def goAdFree(self, checkout_session_id):
+        from datetime import datetime
+        from dateutil.relativedelta import relativedelta
+        now = datetime.now()
+        pfrec = { }
+        pfrec["stripe_checkout_session_id"] = checkout_session_id
+        pfrec["date"] = now.isoformat()
+        expires = now + relativedelta(years=1)
+        pfrec["expires"] = expires.isoformat()
+
+        if self.paid_features == None: self.paid_features = { }
+        self.paid_features["ad_free"] = pfrec
+        self.save()
+
     def get_one_click_unsub_key(self):
         # Get the current one-click unsubscribe key for a user. If no key is set or
         # a key is out of date, generate a fresh key.
