@@ -70,12 +70,15 @@ def vote_details(request, congress, session, chamber_code, number):
     # Test if we have diagrams for this vote. The only
     # way to test is to try to make it.
     has_diagram = { }
-    for image_type in ("map", "diagram"):
-        try:
-            vote_thumbnail_image(request, congress, session, chamber_code, number, image_type)
-            has_diagram[image_type] = True
-        except Http404:
-            has_diagram[image_type] = False
+    try:
+    	has_diagram["map"] = vote_thumbnail_image_map(vote, method="html")[0]\
+    		.replace("ns0:", "")
+    except:
+    	has_diagram["map"] = False
+    try:
+    	has_diagram["diagram"] = vote_thumbnail_image_seating_diagram(vote, include_result=False)[0],
+    except:
+    	has_diagram["diagram"] = False
     
     # sorting by party actually sorts by party first and by ideology score
     # second.
@@ -279,14 +282,19 @@ def vote_thumbnail_small(vote):
 	# Return the image.
 	return (buf.getvalue(), "image/png")
 
-def vote_thumbnail_image_map(vote):
+def vote_thumbnail_image_map(vote, method=None):
 	# We only have an SVG for House votes for certain Congresses.
 	if vote.chamber != CongressChamber.house:
 		raise Http404()
 
 	if vote.congress in (118, 119, 120, 121, 122, 123):
+		# 2020 Census Districts
+		# Although there were some minor changes in district boundaries over
+		# this time period, there weren't changes in the total number of
+		# districts in each state, so we're glossing over the geographic changes.
 		cartogram_year = 2022
 	elif vote.congress in (113, 114, 115, 116, 117):
+		# 2010 Census Districts
 		# Although there were some minor changes in district boundaries over
 		# this time period, there weren't changes in the total number of
 		# districts in each state, so we're glossing over the geographic changes.
@@ -300,17 +308,20 @@ def vote_thumbnail_image_map(vote):
 
 	# Fetch color codes per district and make SVG CSS styles.
 	styles = { }
+	tooltips = { }
 	for voter in vote.get_voters():
 		if not voter.person_role: continue # some votes cannot map voters to roles such as when there are mismatches w/ the term start/end dates
-		if voter.option.key not in ("+", "-"): continue # don't know what color to assign here
 		district = voter.person_role.state.lower() + ("%02d" % voter.person_role.district)
+		tooltips[district] = district.upper() + ": " + voter.person.name_no_details()
+
+		if voter.option.key not in ("+", "-"): continue # only fill districts with votes
 		clr = vote_diagram_colors.get((voter.person_role.party[0], voter.option.key))
-		if clr:
+		if clr and voter.option.key == "+":
 			clr = tuple([c*256 for c in clr])
-			#if voter.option.key == "+":
 			styles[district] = "fill: rgb(%d,%d,%d); stroke: #AAA; strike-width: 1px;" % clr
-			#else:
-			#	styles[district] = "fill: transparent; stroke: rgb(%d,%d,%d); strike-width: 1px;" % clr
+		else:
+			styles[district] = "fill: white; stroke: #666; stroke-width: 1px;"
+
 	if len(styles) == 0:
 		# Does not have any +/- votes.
 		raise Http404()
@@ -320,12 +331,30 @@ def vote_thumbnail_image_map(vote):
 		style = styles.get(node.get("id"))
 		if style:
 			node.set("style", style)
-		elif node.tag.endswith("polygon"):
-			# No voter for this district.
-			node.set("style", "fill: white; stroke: #666; stroke-width: 1px;")
+		elif node.tag == "{http://www.w3.org/2000/svg}polygon":
+			# No vote for this district: Either legislator didn't vote,
+			# seat is vacaant, or delegate wasn't eligible.
+			node.set("style", "display: none")
+		elif node.tag == "{http://www.w3.org/2000/svg}g":
+			# Hide the state label if no voters for any districts in the
+			# state (probably a territory with an ineligible delegate).
+			# Would be bad if a whole state's delegation didn't vote.
+			ok = False
+			for n in node.iter():
+				if n.get("id") in styles: ok = True
+			if not ok:
+				node.set("style", "display: none")
+
+		tooltip = tooltips.get(node.get("id"))
+		if tooltip:
+			text = ET.SubElement(node, "{http://www.w3.org/2000/svg}text")
+			text.text = tooltip
 
 	# Send raw SVG response.
-	return (ET.tostring(tree.getroot()), "image/svg+xml")
+	return (ET.tostring(tree.getroot(),
+	                    encoding="utf8" if not method else "unicode",
+	                    xml_declaration=False,
+	                    method=method), "image/svg+xml")
 
 def vote_thumbnail_wide(vote):
     import cairo, re

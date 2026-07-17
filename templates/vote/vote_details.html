@@ -676,13 +676,14 @@ $(function() {
           <div class="card-header">
             Cartogram Map
           </div>
-          <img src="{{ vote.get_absolute_url }}/map" class="img-fluid card-img-top" style="margin: 5px" alt="Diagram in the style of a cartogram, which is a type of map, showing how legislators voted." />
           <div class="card-body">
-            <p class="card-text">
+            <img src="{{ vote.get_absolute_url }}/map" class="img-fluid" alt="Diagram in the style of a cartogram, which is a type of map, showing how legislators voted." />
+            {# {{has_diagram.map|safe}} Not sure if this works cross-browser because of namespace issues #}
+            <p class="card-text" style="margin-top: 15px;">
                 Each hexagon represents one congressional district.
                 {% for item in totals.options %}
                   {% if item.option.key == "+" %}
-                    Dark shaded hexes are {{item.option.value}} votes.
+                    Color indicates {{item.option.value}} votes.
                   {% endif %}
                 {% endfor %}
             </div>
